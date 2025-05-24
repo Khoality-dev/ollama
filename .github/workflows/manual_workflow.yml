@@ -1,0 +1,30 @@
+name: Manual workflow
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ vars.DOCKER_USER }}  
+        password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+    - name: Build the Docker image
+      run: |
+        TAG="my-image-name:$(date +%s)"
+        docker build . \
+          --file Dockerfile \
+          --tag "$TAG"
